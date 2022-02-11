@@ -6,11 +6,12 @@ import (
 )
 
 func main() {
+	possibleWordsView := tview.NewTextView().SetWordWrap(true)
+	possibleWordsView.SetBorder(true).SetTitle("Possible Words")
+
 	wrongLettersInput := tview.NewInputField().SetFieldWidth(15).SetFieldBackgroundColor(tcell.ColorGray)
 	correctLettersForm := createLetterForm(tcell.ColorGreen, 1, 5)
 	wrongBoxLettersForm := createLetterForm(tcell.ColorYellow, 4, 5)
-	possibleWordsView := tview.NewTextView()
-	possibleWordsView.SetBorder(true).SetTitle("Possible Words")
 	resetButton := tview.NewButton("Reset")
 	resetButton.SetBackgroundColor(tcell.ColorRed)
 	submitButton := tview.NewButton("Submit")
@@ -41,7 +42,7 @@ func main() {
 		AddItem(form, 0, 1, false).
 		AddItem(possibleWordsView, 0, 2, false)
 	flex.SetBorder(true).SetTitle("Go wordle solver")
-	if err := app.SetRoot(flex, true).SetFocus(flex).Run(); err != nil {
+	if err := app.SetRoot(flex, true).SetFocus(wrongLettersInput).Run(); err != nil {
 		panic(err)
 	}
 }
