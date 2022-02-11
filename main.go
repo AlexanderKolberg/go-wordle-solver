@@ -12,49 +12,48 @@ import (
 
 func main() {
 	wrongLettersInput := tview.NewInputField().SetFieldWidth(15).SetFieldBackgroundColor(tcell.ColorGray)
-	correctLetters := createLetterForm(tcell.ColorGreen, 1, 5)
-	wrongBox := createLetterForm(tcell.ColorYellow, 4, 5)
-	wordsView := tview.NewTextView()
-	wordsView.SetBorder(true).SetTitle("Possible Words")
-	reset := tview.NewButton("Reset")
-	reset.SetBackgroundColor(tcell.ColorRed)
-	submit := tview.NewButton("Submit")
+	correctLettersForm := createLetterForm(tcell.ColorGreen, 1, 5)
+	wrongBoxLettersForm := createLetterForm(tcell.ColorYellow, 4, 5)
+	possibleWordsView := tview.NewTextView()
+	possibleWordsView.SetBorder(true).SetTitle("Possible Words")
+	resetButton := tview.NewButton("Reset")
+	resetButton.SetBackgroundColor(tcell.ColorRed)
+	submitButton := tview.NewButton("Submit")
 
 	setWords := func(words string) {
-		wordsView.SetText(words)
+		possibleWordsView.SetText(words)
 	}
 
 	submitHandler := func() {
 		wrongLetters := wrongLettersInput.GetText()
-		correct := getFormInputs(*correctLetters)
-		wrongBoxLetters := getFormInputs(*wrongBox)
+		correct := getFormInputs(*correctLettersForm)
+		wrongBoxLetters := getFormInputs(*wrongBoxLettersForm)
 		words := getWords(wrongLetters, correct, wrongBoxLetters)
 		setWords(words)
 	}
 
-	reset.SetSelectedFunc(func() { setWords("reset") })
-	submit.SetSelectedFunc(submitHandler)
+	resetButton.SetSelectedFunc(func() { setWords("reset") })
+	submitButton.SetSelectedFunc(submitHandler)
 	form := tview.NewFlex().SetDirection(tview.FlexRow).
 		AddItem(tview.NewTextView().SetText("Wrong letters:"), 0, 1, false).
 		AddItem(wrongLettersInput, 0, 1, false).
 		AddItem(tview.NewTextView().SetText("Correct Letters:"), 0, 1, false).
-		AddItem(correctLetters, 0, 1, false).
+		AddItem(correctLettersForm, 0, 1, false).
 		AddItem(tview.NewTextView().SetText("Correct letters, wrong box:"), 0, 1, false).
-		AddItem(wrongBox, 0, 1, false).
+		AddItem(wrongBoxLettersForm, 0, 1, false).
 		AddItem(tview.NewFlex().
-			AddItem(submit, 0, 1, false).
-			AddItem(reset, 0, 1, false), 0, 1, false)
+			AddItem(submitButton, 0, 1, false).
+			AddItem(resetButton, 0, 1, false), 0, 1, false)
 
 	app := tview.NewApplication().EnableMouse(true)
 	flex := tview.NewFlex().
 		AddItem(form, 0, 1, false).
-		AddItem(wordsView, 0, 2, false)
+		AddItem(possibleWordsView, 0, 2, false)
 	flex.SetBorder(true).SetTitle("Go wordle solver")
 	if err := app.SetRoot(flex, true).SetFocus(flex).Run(); err != nil {
 		panic(err)
 	}
 }
-
 func getWords(wrongLetters string, correct []string, wrongBoxLetters []string) string {
 	alphabet := "abcdefghijklmnopqrstuvwxyz"
 	validLetters := ""
