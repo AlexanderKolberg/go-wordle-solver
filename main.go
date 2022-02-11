@@ -20,19 +20,15 @@ func main() {
 	resetButton.SetBackgroundColor(tcell.ColorRed)
 	submitButton := tview.NewButton("Submit")
 
-	setWords := func(words string) {
-		possibleWordsView.SetText(words)
-	}
-
 	submitHandler := func() {
 		wrongLetters := wrongLettersInput.GetText()
 		correct := getFormInputs(*correctLettersForm)
 		wrongBoxLetters := getFormInputs(*wrongBoxLettersForm)
 		words := getWords(wrongLetters, correct, wrongBoxLetters)
-		setWords(words)
+		possibleWordsView.SetText(words)
 	}
 
-	resetButton.SetSelectedFunc(func() { setWords("reset") })
+	resetButton.SetSelectedFunc(func() { possibleWordsView.SetText("reset") })
 	submitButton.SetSelectedFunc(submitHandler)
 	form := tview.NewFlex().SetDirection(tview.FlexRow).
 		AddItem(tview.NewTextView().SetText("Wrong letters:"), 0, 1, false).
