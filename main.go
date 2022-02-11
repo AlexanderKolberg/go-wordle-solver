@@ -123,10 +123,10 @@ func createLetterForm(color tcell.Color, inputSize int, fields int) *tview.Form 
 	return form
 }
 
-func getFormInputs(wrongBox tview.Form) []string {
+func getFormInputs(form tview.Form) []string {
 	var out []string
-	for i := 0; i < wrongBox.GetFormItemCount(); i++ {
-		item := wrongBox.GetFormItem(i).(*tview.InputField).GetText()
+	for i := 0; i < form.GetFormItemCount(); i++ {
+		item := form.GetFormItem(i).(*tview.InputField).GetText()
 		if len(item) > 0 {
 			out = append(out, item)
 		} else {
