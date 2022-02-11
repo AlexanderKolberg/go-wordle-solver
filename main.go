@@ -1,11 +1,6 @@
 package main
 
 import (
-	"bufio"
-	"os"
-	"regexp"
-	"strings"
-
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
@@ -24,7 +19,7 @@ func main() {
 		wrongLetters := wrongLettersInput.GetText()
 		correct := getFormInputs(*correctLettersForm)
 		wrongBoxLetters := getFormInputs(*wrongBoxLettersForm)
-		words := getWords(wrongLetters, correct, wrongBoxLetters)
+		words := getPossibleWords(wrongLetters, correct, wrongBoxLetters)
 		possibleWordsView.SetText(words)
 	}
 
@@ -50,70 +45,7 @@ func main() {
 		panic(err)
 	}
 }
-func getWords(wrongLetters string, correct []string, wrongBoxLetters []string) string {
-	alphabet := "abcdefghijklmnopqrstuvwxyz"
-	validLetters := ""
-	for _, l := range alphabet {
-		if !strings.Contains(wrongLetters, string(l)) {
-			validLetters += string(l)
-		}
-	}
-	rxString := ""
-	for i, l := range correct {
-		if len(l) == 0 {
-			if len(wrongBoxLetters[i]) > 0 {
-				validSub := ""
-				for _, d := range validLetters {
-					if !strings.Contains(wrongBoxLetters[i], string(d)) {
-						validSub += string(d)
-					}
-				}
-				rxString += "[" + validSub + "]"
-			} else {
-				rxString += "[" + validLetters + "]"
-			}
-		} else {
-			rxString += string(l)
-		}
-	}
-	rx := regexp.MustCompile(rxString)
-	combined := strings.Join(wrongBoxLetters, "")
-	rx2 := regexp.MustCompile(".")
-	if len(combined) > 0 {
-		rx2 = regexp.MustCompile("[" + combined + "]")
-	}
-	words := readWordlist()
-	remainingWords := ""
-	for _, w := range words {
-		if rx.MatchString(w) && rx2.MatchString(w) {
-			if len(remainingWords) > 0 {
-				remainingWords += " "
-			}
-			remainingWords += w
-		}
-	}
-	return remainingWords
-}
 
-func readWordlist() []string {
-	if fp, err := os.Open("wordlist.txt"); err != nil {
-		panic(err)
-	} else {
-		defer fp.Close()
-		var wordlist []string
-		scanner := bufio.NewScanner(fp)
-		for scanner.Scan() {
-			w := string(scanner.Bytes())
-			if w != "" {
-				wordlist = append(wordlist, w)
-			}
-		}
-		if err := scanner.Err(); err != nil {
-			panic(err)
-		}
-		return wordlist
-	}
-}
 func createLetterForm(color tcell.Color, inputSize int, fields int) *tview.Form {
 	form := tview.NewForm().SetHorizontal(true).SetFieldBackgroundColor(color)
 	for i := 0; i < fields; i++ {
