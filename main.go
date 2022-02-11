@@ -10,70 +10,19 @@ import (
 	"github.com/rivo/tview"
 )
 
-func ReadWordlist() []string {
-	if fp, err := os.Open("wordlist.txt"); err != nil {
-		panic(err)
-	} else {
-		defer fp.Close()
-		var wordlist []string
-		scanner := bufio.NewScanner(fp)
-		for scanner.Scan() {
-			w := string(scanner.Bytes())
-			if w != "" {
-				wordlist = append(wordlist, w)
-			}
-		}
-		if err := scanner.Err(); err != nil {
-			panic(err)
-		}
-		return wordlist
-	}
-}
-
 func main() {
-	createLetterForm := func(color tcell.Color, inputSize int, fields int) *tview.Form {
-		form := tview.NewForm().SetHorizontal(true).SetFieldBackgroundColor(color)
-		for i := 0; i < fields; i++ {
-			form.AddInputField("", "", inputSize, nil, nil)
-		}
-		form.SetBorderPadding(0, 0, 0, 0)
-		return form
-	}
-
+	wrongLettersInput := tview.NewInputField().SetFieldWidth(15).SetFieldBackgroundColor(tcell.ColorGray)
 	correctLetters := createLetterForm(tcell.ColorGreen, 1, 5)
-	getCorrectLetters := func() string {
-		out := ""
-		for i := 0; i < correctLetters.GetFormItemCount(); i++ {
-			item := correctLetters.GetFormItem(i).(*tview.InputField).GetText()
-			if len(item) > 0 {
-				out += item
-			} else {
-				out += "."
-			}
-		}
-		return out
-	}
 	wrongBox := createLetterForm(tcell.ColorYellow, 4, 5)
-	getWrongBoxLetters := func() []string {
-		var out []string
-		for i := 0; i < wrongBox.GetFormItemCount(); i++ {
-			item := wrongBox.GetFormItem(i).(*tview.InputField).GetText()
-			if len(item) > 0 {
-				out = append(out, item)
-			} else {
-				out = append(out, "")
-			}
-		}
-		return out
-	}
-
 	wordsView := tview.NewTextView()
 	wordsView.SetBorder(true).SetTitle("Possible Words")
+	reset := tview.NewButton("Reset")
+	reset.SetBackgroundColor(tcell.ColorRed)
+	submit := tview.NewButton("Submit")
+
 	setWords := func(words string) {
 		wordsView.SetText(words)
 	}
-
-	wrongLettersInput := tview.NewInputField().SetFieldWidth(15).SetFieldBackgroundColor(tcell.ColorGray)
 
 	submitHandler := func() {
 		alphabet := "abcdefghijklmnopqrstuvwxyz"
@@ -85,8 +34,8 @@ func main() {
 			}
 		}
 		rxString := ""
-		correct := getCorrectLetters()
-		wrongBoxLetters := getWrongBoxLetters()
+		correct := getCorrectLetters(*correctLetters)
+		wrongBoxLetters := getWrongBoxLetters(*wrongBox)
 		for i, l := range correct {
 			if l == '.' {
 				if len(wrongBoxLetters[i]) > 0 {
@@ -110,7 +59,7 @@ func main() {
 		if len(combined) > 0 {
 			rx2 = regexp.MustCompile("[" + combined + "]")
 		}
-		words := ReadWordlist()
+		words := readWordlist()
 		remainingWords := ""
 		for _, w := range words {
 			if rx.MatchString(w) && rx2.MatchString(w) {
@@ -123,10 +72,7 @@ func main() {
 		setWords(remainingWords)
 	}
 
-	reset := tview.NewButton("Reset")
-	reset.SetBackgroundColor(tcell.ColorRed)
 	reset.SetSelectedFunc(func() { setWords("reset") })
-	submit := tview.NewButton("Submit")
 	submit.SetSelectedFunc(submitHandler)
 	form := tview.NewFlex().SetDirection(tview.FlexRow).
 		AddItem(tview.NewTextView().SetText("Wrong letters:"), 0, 1, false).
@@ -147,4 +93,57 @@ func main() {
 	if err := app.SetRoot(flex, true).SetFocus(flex).Run(); err != nil {
 		panic(err)
 	}
+}
+
+func readWordlist() []string {
+	if fp, err := os.Open("wordlist.txt"); err != nil {
+		panic(err)
+	} else {
+		defer fp.Close()
+		var wordlist []string
+		scanner := bufio.NewScanner(fp)
+		for scanner.Scan() {
+			w := string(scanner.Bytes())
+			if w != "" {
+				wordlist = append(wordlist, w)
+			}
+		}
+		if err := scanner.Err(); err != nil {
+			panic(err)
+		}
+		return wordlist
+	}
+}
+func createLetterForm(color tcell.Color, inputSize int, fields int) *tview.Form {
+	form := tview.NewForm().SetHorizontal(true).SetFieldBackgroundColor(color)
+	for i := 0; i < fields; i++ {
+		form.AddInputField("", "", inputSize, nil, nil)
+	}
+	form.SetBorderPadding(0, 0, 0, 0)
+	return form
+}
+
+func getCorrectLetters(correctLetters tview.Form) string {
+	out := ""
+	for i := 0; i < correctLetters.GetFormItemCount(); i++ {
+		item := correctLetters.GetFormItem(i).(*tview.InputField).GetText()
+		if len(item) > 0 {
+			out += item
+		} else {
+			out += "."
+		}
+	}
+	return out
+}
+func getWrongBoxLetters(wrongBox tview.Form) []string {
+	var out []string
+	for i := 0; i < wrongBox.GetFormItemCount(); i++ {
+		item := wrongBox.GetFormItem(i).(*tview.InputField).GetText()
+		if len(item) > 0 {
+			out = append(out, item)
+		} else {
+			out = append(out, "")
+		}
+	}
+	return out
 }
