@@ -34,10 +34,10 @@ func main() {
 			}
 		}
 		rxString := ""
-		correct := getCorrectLetters(*correctLetters)
-		wrongBoxLetters := getWrongBoxLetters(*wrongBox)
+		correct := getFormInputs(*correctLetters)
+		wrongBoxLetters := getFormInputs(*wrongBox)
 		for i, l := range correct {
-			if l == '.' {
+			if len(l) == 0 {
 				if len(wrongBoxLetters[i]) > 0 {
 					validSub := ""
 					for _, d := range validLetters {
@@ -123,19 +123,7 @@ func createLetterForm(color tcell.Color, inputSize int, fields int) *tview.Form 
 	return form
 }
 
-func getCorrectLetters(correctLetters tview.Form) string {
-	out := ""
-	for i := 0; i < correctLetters.GetFormItemCount(); i++ {
-		item := correctLetters.GetFormItem(i).(*tview.InputField).GetText()
-		if len(item) > 0 {
-			out += item
-		} else {
-			out += "."
-		}
-	}
-	return out
-}
-func getWrongBoxLetters(wrongBox tview.Form) []string {
+func getFormInputs(wrongBox tview.Form) []string {
 	var out []string
 	for i := 0; i < wrongBox.GetFormItemCount(); i++ {
 		item := wrongBox.GetFormItem(i).(*tview.InputField).GetText()
